@@ -24,7 +24,7 @@ class Toast {
         return WillPopScope(
             onWillPop: () async => false,
             child: AlertDialog(
-              shape: RoundedRectangleBorder(
+              shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(8.0))),
               backgroundColor: Colors.black87,
               content: LoadingIndicator(text: text),
@@ -42,7 +42,7 @@ class LoadingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         color: Colors.black.withOpacity(0.8),
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -51,7 +51,7 @@ class LoadingIndicator extends StatelessWidget {
   }
 
   Widget _getLoadingIndicator() {
-    return Padding(
+    return const Padding(
         padding: EdgeInsets.only(bottom: 16),
         child: SizedBox(
             width: 32,
@@ -60,7 +60,7 @@ class LoadingIndicator extends StatelessWidget {
   }
 
   Widget _getHeading() {
-    return Padding(
+    return const Padding(
         padding: EdgeInsets.only(bottom: 4),
         child: Text(
           'Please wait …',
@@ -72,7 +72,7 @@ class LoadingIndicator extends StatelessWidget {
   Widget _getText(String displayedText) {
     return Text(
       displayedText,
-      style: TextStyle(color: Colors.white, fontSize: 14),
+      style: const TextStyle(color: Colors.white, fontSize: 14),
       textAlign: TextAlign.center,
     );
   }

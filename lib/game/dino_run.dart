@@ -1,6 +1,6 @@
 import 'package:dino_run/main.dart';
 import 'package:flame/game.dart';
-import 'package:flame/input.dart';
+//import 'package:flame/input.dart';
 import 'package:hive/hive.dart';
 import 'package:flame/parallax.dart';
 import 'package:flutter/material.dart';

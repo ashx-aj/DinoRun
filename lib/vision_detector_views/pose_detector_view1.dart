@@ -1,4 +1,4 @@
-//import 'dart:math';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:dino_run/main.dart';
@@ -15,10 +15,7 @@ class PoseDetectorView extends StatefulWidget {
 
 class _PoseDetectorViewState extends State<PoseDetectorView> {
   int i = 1;
-  double standing_wrist = 0;
-  double standing_mid = 0;
-  /*double rwrist = 0;
-  double lwrist = 0;*/
+  double standing = 0;
   int squatno = 0;
   int frame = 0;
   bool fixedAngle = false;
@@ -58,98 +55,65 @@ class _PoseDetectorViewState extends State<PoseDetectorView> {
     setState(() {
       _text = '';
     });
-
     final poses = await _poseDetector.processImage(inputImage);
 
+    // printing left eye y coordinate
     for (Pose pose in poses) {
-      // to access specific landmarks  [ we need wrist,pinky,index]
-      final rightwrist = pose.landmarks[PoseLandmarkType.rightWrist];
-      final leftwrist = pose.landmarks[PoseLandmarkType.leftWrist];
+      // to access specific landmarks  [ we need hip,knee,ankle]
+      final rightHipPoint = pose.landmarks[PoseLandmarkType.rightHip];
+      final rightKneePoint = pose.landmarks[PoseLandmarkType.rightKnee];
+      final rightAnklePoint = pose.landmarks[PoseLandmarkType.rightAnkle];
 
-      final rightpinky = pose.landmarks[PoseLandmarkType.rightPinky];
-      final leftpinky = pose.landmarks[PoseLandmarkType.leftPinky];
+      if (rightHipPoint != null &&
+          rightKneePoint != null &&
+          rightAnklePoint != null) {
+        // slope of hip and knee
+        double slopeA = (rightHipPoint.y - rightKneePoint.y) /
+            (rightHipPoint.x - rightKneePoint.x);
 
-      final rightindex = pose.landmarks[PoseLandmarkType.rightIndex];
-      final leftindex = pose.landmarks[PoseLandmarkType.leftIndex];
+        double slopeB = (rightAnklePoint.y - rightKneePoint.y) /
+            (rightAnklePoint.x - rightKneePoint.x);
 
-      //print(rightwrist.x);
-      //print(leftwrist.x);
+        double angle = atan((slopeB - slopeA) / (1 + slopeA * slopeB));
 
-      if (rightwrist != null &&
-          rightpinky != null &&
-          rightindex != null &&
-          leftwrist != null &&
-          leftpinky != null &&
-          leftindex != null) {
-        //midpoint of pinky and index
-        double rmidx = (rightpinky.x + rightindex.x) / 2;
-        //double rmidy = (rightpinky.y + rightindex.y)/2;
+        // convert angle to radian
 
-        double lmidx = (leftpinky.x + leftindex.x) / 2;
-        //double lmidy = (leftpinky.y + leftindex.y)/2;
-
-        print(rmidx);
-        print(lmidx);
-
-        //finding vertical and horizontal distancebetween the right and left
-        double dx_wrist = rightwrist.x - leftwrist.x;
-        //double dy_wrist = rightwrist.y - leftwrist.y;
-
-        double dx_mid = rmidx - lmidx;
-        //double dy_mid = rmidy - lmidy;
-
-        print(dx_wrist);
-        print(dx_mid);
-
-        changer.selectedOpt = 0;
+        double degree = angle * 180 / pi;
+        changer.selectedOpt == 0;
         changer.notify();
 
         // Store average value of standing of between 50 and 100 frames
+
         if (!changer.positionCapture) {
           frame++;
           print("frame no :$frame");
         }
 
-        /*if (frame <= 25) {
-          rwrist += rightwrist.x;
-          lwrist += leftwrist.x;
-          changer.poseStanding = (rwrist - lwrist) / 25;
-          changer.notify();
-        }*/
-
-        if (frame >= 50 && frame <= 150) {
-          standing_wrist += dx_wrist;
-          standing_mid += dx_mid;
+        if (frame >= 50 && frame <= 100) {
+          standing += degree;
         }
 
-        if (frame > 150 && !changer.positionCapture) {
+        if (frame > 100 && !changer.positionCapture) {
           changer.positionCapture = true;
-          standing_mid = standing_mid / 100;
-          standing_wrist = standing_wrist / 100;
-          print(
-              "The average horizontal distance of wrist is ${standing_wrist.abs()}");
-          print(
-              "The average horizontal distance of mid is ${standing_mid.abs()}");
+          standing = standing / 50;
+          print("The average degree of standing is ${standing.abs()}");
           const snackBar = SnackBar(
-            content: Text('you are ready to start'),
+            content: Text('you are ready to take squat'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
 
-        // check hand movement
+        // check squat
 
         if (changer.positionCapture && !squat) {
-          print("CURRENT  WRIST: ${dx_wrist.abs()}");
-          print("CURRENT  MID: ${dx_mid.abs()}");
-
-          if ((dx_wrist.abs() - standing_wrist.abs() > 10 &&
-              dx_mid.abs() - standing_mid.abs() > 10)) {
+          print("CURRENT ANGLE: ${degree.abs()}");
+          if ((degree.abs() - standing.abs() > 40)) {
             squat = true;
             squatno++;
             changer.selectedOpt = 1;
             changer.notify();
 
-            print("SQUAT");
+            // print("SQUAT");
           } else {
             changer.selectedOpt = 0;
             changer.notify();
@@ -159,10 +123,8 @@ class _PoseDetectorViewState extends State<PoseDetectorView> {
         // check for standing
 
         if (changer.positionCapture && squat) {
-          print("CURRENT ANGLE: ${dx_wrist.abs()}");
-          print("CURRENT  MID: ${dx_mid.abs()}");
-
-          if ((dx_wrist.abs() - changer.poseStanding.abs() < 10)) {
+          print("CURRENT ANGLE: ${degree.abs()}");
+          if ((degree.abs() - changer.poseStanding.abs() < 20)) {
             squat = false;
             // print("STAND");
           }
@@ -171,6 +133,25 @@ class _PoseDetectorViewState extends State<PoseDetectorView> {
         print("No of squats : $squatno");
       }
     }
+
+    //##
+    // print(leftEyeY);
+    // changer.selectedOpt == 0;
+    // changer.notify();
+
+    // if (!up) {
+    //   if (leftEyeY != null) {
+    //     if (leftEyeY > 500) {
+    //       up = true;
+    //       changer.selectedOpt = 1;
+    //       changer.notify();
+    //     } else {
+    //       changer.selectedOpt = 0;
+    //       changer.notify();
+    //     }
+    //   }
+    // }
+
     if (inputImage.inputImageData?.size != null &&
         inputImage.inputImageData?.imageRotation != null) {
       final painter = PosePainter(poses, inputImage.inputImageData!.size,

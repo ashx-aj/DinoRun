@@ -1,4 +1,3 @@
-import 'package:dino_run/game/dino.dart';
 import 'package:dino_run/vision_detector_views/pose_detector_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
@@ -86,67 +85,22 @@ class DinoRunApp extends StatelessWidget {
   }
 }
 
-/*class JustStyle extends StatelessWidget {
-  const JustStyle({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-          body: Row(
-        children: const [
-          SizedBox(
-            width: 300,
-            child: PoseDetectorView(),
-          ),
-          SizedBox(
-            width: 500,
-            child: DinoRunApp(),
-          ),
-        ],
-      )),
-    );
-  }
-} 
 class JustStyle extends StatelessWidget {
   const JustStyle({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width / 2,
-            child: PoseDetectorView(),
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width / 2,
-            child: DinoRunApp(),
-          ),
-        ],
-      ),
-    );
-  }
-}*/
-
-class JustStyle extends StatelessWidget {
-  const JustStyle({super.key});
-
-  @override
-  Widget build(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
     return MaterialApp(
       home: Scaffold(
-        body: Container(
-          child: Row(
-            children: const [
-              SizedBox(
-                child: PoseDetectorView(),
-                width: 300,
-              ),
-              Expanded(child: DinoRunApp()),
-            ],
-          ),
+        body: Row(
+          children: [
+            SizedBox(
+              width: w * 0.5,
+              child: const PoseDetectorView(),
+            ),
+            SizedBox(width: w * 0.5, child: const DinoRunApp()),
+          ],
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
-
+import 'dart:math';
 import 'coordinates_translator.dart';
 
 class PosePainter extends CustomPainter {
@@ -27,8 +27,13 @@ class PosePainter extends CustomPainter {
       ..strokeWidth = 3.0
       ..color = Colors.blueAccent;
 
-    for (final pose in poses) {
+    canvas.save(); // Save the current canvas state
 
+    canvas.rotate(-pi / 2); // Rotate canvas by -90 degrees (counter-clockwise)
+    canvas.translate(
+        -size.height, 0); // Translate canvas to fit the new rotated size
+
+    for (final pose in poses) {
       pose.landmarks.forEach((_, landmark) {
         canvas.drawCircle(
             Offset(
@@ -60,22 +65,18 @@ class PosePainter extends CustomPainter {
           rightPaint);
       paintLine(
           PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist, rightPaint);
-
-      //Draw Body
       paintLine(
-          PoseLandmarkType.leftShoulder, PoseLandmarkType.leftHip, leftPaint);
-      paintLine(PoseLandmarkType.rightShoulder, PoseLandmarkType.rightHip,
-          rightPaint);
-
-      //Draw legs
-      paintLine(PoseLandmarkType.leftHip, PoseLandmarkType.leftKnee, leftPaint);
+          PoseLandmarkType.rightPinky, PoseLandmarkType.rightWrist, rightPaint);
       paintLine(
-          PoseLandmarkType.leftKnee, PoseLandmarkType.leftAnkle, leftPaint);
+          PoseLandmarkType.rightIndex, PoseLandmarkType.rightWrist, rightPaint);
       paintLine(
-          PoseLandmarkType.rightHip, PoseLandmarkType.rightKnee, rightPaint);
+          PoseLandmarkType.leftPinky, PoseLandmarkType.leftWrist, leftPaint);
       paintLine(
-          PoseLandmarkType.rightKnee, PoseLandmarkType.rightAnkle, rightPaint);
+          PoseLandmarkType.leftIndex, PoseLandmarkType.leftWrist, leftPaint);
     }
+
+    canvas
+        .restore(); //Restore the saved canvas state (undo rotation and translation)
   }
 
   @override
